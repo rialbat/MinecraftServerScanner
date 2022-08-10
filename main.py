@@ -1,12 +1,27 @@
 #F:\Visual Studio Shared\Python39_64
 
+# For reqs and resps
 import socket
+import requests
+
+# Pack data
 import struct
+
 import json
+import sys
 import time
+import ipaddress
+
+# GUI
+from PySide6 import QtWidgets, QtCore, QtGui
+import MainWindow
+
+# Parse
+#from bs4 import BeautifulSoup
+
 
 class ServerStatus:
-    def __init__(self, host, port=25565, timeout=5):
+    def __init__(self, host='127.0.0.1', port=25565, timeout=5):
         self._host = host
         self._port = port
         self._timeout = timeout
@@ -109,7 +124,88 @@ class ServerStatus:
 
         return response
 
+class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.menuAbout.customTriggeredSignal.connect(self.aboutMessage)
+        self.startButton.clicked.connect(self.startAsyncSerch)
+        self.stopButton.clicked.connect(self.stopAsyncSerch)
+        self.pauseButton.clicked.connect(self.pauseAsyncSerch)
+        self._model = QtGui.QStandardItemModel()
+        self.tableInit()
 
+        self._start_ip = '127.0.0.1'
+        self._end_ip = '127.0.0.1'
+        self._specificPort = 25565
+        self._serverStatus = ServerStatus()
+        self._totalLines = 0
+
+
+    def tableInit(self):
+        headersLabels = ["ID", "Server address", "Server description",
+                         "Version", "Online", "Max players", "Country", "City",
+                         "Hostname", "Ping"]
+
+        self._model.setHorizontalHeaderLabels(headersLabels)
+        self.tableView.setModel(self._model)
+
+    def getWhoIsData(self, host):
+        url = ''
+
+    def aboutMessage(self):
+        QtWidgets.QMessageBox.about(self, "About",
+                                    "The program was created by rialbat\nVersion: 0.1\nMIT License")
+
+    def startAsyncSerch(self):
+        self.stopButton.setEnabled(True)
+        self.pauseButton.setEnabled(True)
+        self.pauseButton.setText("Pause")
+
+        self._serverStatus._port = self.portSpinBox.value()
+
+        self._start_ip = ipaddress.IPv4Address(self.startIpLineEdit.text())
+        self._end_ip = ipaddress.IPv4Address(self.endIpLineEdit.text())
+
+        for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
+            self._serverStatus._host = str(ipaddress.IPv4Address(ip_int))
+            self._totalLines = self._totalLines + 1
+            # ID
+            itemID = QtGui.QStandardItem(str(self._totalLines))
+            itemID.setTextAlignment(QtCore.Qt.AlignCenter) # type: ignore
+            self._model.setItem(self._totalLines - 1, 0, itemID)
+            # Server address
+            itemSAdd = QtGui.QStandardItem(str(ipaddress.IPv4Address(ip_int)) + ":"
+                                           + str(self.portSpinBox.value()))
+            itemSAdd.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+            self._model.setItem(self._totalLines - 1, 1, itemSAdd)
+            # Server description
+
+            # Version
+
+            # Online
+
+            # Max players
+
+            # Country, City, Hostname
+
+            print(self._serverStatus.get_status())
+
+
+
+    def stopAsyncSerch(self):
+        #TODO stop actions
+        self.stopButton.setEnabled(False)
+        self.pauseButton.setEnabled(False)
+        self.pauseButton.setText("Pause")
+
+    def pauseAsyncSerch(self):
+        self.pauseButton.setText("Resume")
+
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    window = ProgrammUI()
+    window.show()
+    app.exec()
 if __name__ == '__main__':
-    status_ping = ServerStatus('')
-    print(status_ping.get_status())
+    main()
