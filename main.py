@@ -11,6 +11,8 @@ import json
 import sys
 import time
 import ipaddress
+import re
+import threading
 
 # GUI
 from PySide6 import QtWidgets, QtCore, QtGui
@@ -22,7 +24,7 @@ from findGEO import FindGEO
 # Parse
 from bs4 import BeautifulSoup
 
-programVersion = '0.3'
+programVersion = '0.4'
 
 
 class ServerStatus:
@@ -144,7 +146,9 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self._end_ip = '127.0.0.1'
         self._specificPort = 25565
         self._serverStatus = ServerStatus()
+        self._curLine = 0
         self._totalLines = 0
+        self._checked = 0
 
 
     def tableInit(self):
@@ -155,8 +159,21 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self._model.setHorizontalHeaderLabels(headersLabels)
         self.tableView.setModel(self._model)
 
-    def getWhoIsData(self, host):
-        url = ''
+    def findDescription(self, serverResponse):
+        pattern = r'\'text\': \'(.*?)\'}'
+        subPattern = r'\\n|\\r| {2,}'
+        secSubPattern = r'\\|§.|^[ ]'
+        finalMatch = ''
+        matches = re.finditer(pattern, str(serverResponse), re.MULTILINE)
+
+        for matchNum, match in enumerate(matches, start=1):
+            for groupNum in range(0, len(match.groups())):
+                groupNum = groupNum + 1
+                finalMatch = finalMatch + match.group(groupNum)
+
+        finalMatch = re.sub(subPattern, ' ', finalMatch)
+        finalMatch = re.sub(secSubPattern, '', finalMatch)
+        return finalMatch
 
     def aboutMessage(self):
         QtWidgets.QMessageBox.about(self, "About",
@@ -173,28 +190,40 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self._start_ip = ipaddress.IPv4Address(self.startIpLineEdit.text())
         self._end_ip = ipaddress.IPv4Address(self.endIpLineEdit.text())
 
+        self._totalLines = (int(self._end_ip)+1) - int(self._start_ip)
+        self.IPsLabelStat.setText(str(self._totalLines))
+
         for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
             self._serverStatus._host = str(ipaddress.IPv4Address(ip_int))
+            self._checked = self._checked + 1
+            self.CheckedLabelStat.setText(str(self._checked))
             try:
                 serverResponse = self._serverStatus.get_status()
             except Exception:
                 continue
-            self._totalLines = self._totalLines + 1
+            self._curLine = self._curLine + 1
+            self.FoundLabelStat.setText(str(self._curLine))
+
             # ID
-            itemID = QtGui.QStandardItem(str(self._totalLines))
+            itemID = QtGui.QStandardItem(str(self._curLine))
             itemID.setTextAlignment(QtCore.Qt.AlignCenter) # type: ignore
-            self._model.setItem(self._totalLines - 1, 0, itemID)
+            self._model.setItem(self._curLine - 1, 0, itemID)
+
             # Server address
             itemSAdd = QtGui.QStandardItem(str(ipaddress.IPv4Address(ip_int)) + ":"
                                            + str(self.portSpinBox.value()))
             itemSAdd.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
-            self._model.setItem(self._totalLines - 1, 1, itemSAdd)
+            self._model.setItem(self._curLine - 1, 1, itemSAdd)
+
             # Server description
+            currentDescription = self.findDescription(serverResponse)
+            itemDesc = QtGui.QStandardItem(currentDescription)
+            self._model.setItem(self._curLine - 1, 2, itemDesc)
 
             # Version
             itemVersion = QtGui.QStandardItem(str(self._serverStatus.get_status()['version']['name']))
             itemVersion.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
-            self._model.setItem(self._totalLines - 1, 3, itemVersion)
+            self._model.setItem(self._curLine - 1, 3, itemVersion)
 
             # Online, Max players
             itemOnline = QtGui.QStandardItem(str(self._serverStatus.get_status()['players']['online']))
@@ -203,33 +232,36 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             itemOnline.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
             itemMaxPlayers.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
 
-            self._model.setItem(self._totalLines - 1, 4, itemOnline)
-            self._model.setItem(self._totalLines - 1, 5, itemMaxPlayers)
+            self._model.setItem(self._curLine - 1, 4, itemOnline)
+            self._model.setItem(self._curLine - 1, 5, itemMaxPlayers)
 
             # Country, City, Hostname
-            gesGeo = FindGEO(str(ipaddress.IPv4Address(ip_int)))
-            gesGeo.findLocation()
+            try:
+                gesGeo = FindGEO(str(ipaddress.IPv4Address(ip_int)))
+                gesGeo.findLocation()
 
-            itemCountry = QtGui.QStandardItem(gesGeo.getCountry())
-            itemCity = QtGui.QStandardItem(gesGeo.getCity())
+                itemCountry = QtGui.QStandardItem(gesGeo.getCountry())
+                itemCity = QtGui.QStandardItem(gesGeo.getCity())
 
-            itemCountry.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
-            itemCity.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+                itemCountry.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+                itemCity.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
 
-            self._model.setItem(self._totalLines - 1, 6, itemCountry)
-            self._model.setItem(self._totalLines - 1, 7, itemCity)
+                self._model.setItem(self._curLine - 1, 6, itemCountry)
+                self._model.setItem(self._curLine - 1, 7, itemCity)
+            except Exception:
+                pass
 
             try:
                 itemHostname = QtGui.QStandardItem(socket.gethostbyaddr(str(ipaddress.IPv4Address(ip_int)))[0])
                 itemHostname.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
-                self._model.setItem(self._totalLines - 1, 8, itemHostname)
+                self._model.setItem(self._curLine - 1, 8, itemHostname)
             except Exception:
                 pass
 
             # Ping
             itemPing = QtGui.QStandardItem(str(self._serverStatus.get_status()['ping']))
             itemPing.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
-            self._model.setItem(self._totalLines - 1, 9, itemPing)
+            self._model.setItem(self._curLine - 1, 9, itemPing)
 
             print(serverResponse)
 
