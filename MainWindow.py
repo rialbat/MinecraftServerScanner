@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'MainWindowfmAsOF.ui'
+## Form generated from reading UI file 'MainWindowzRrFbd.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.2.0
 ##
@@ -127,15 +127,18 @@ class Ui_MainWindow(object):
         self.actionOpen_file.setObjectName(u"actionOpen_file")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.gridLayout_2 = QGridLayout(self.centralwidget)
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.gridLayout_3 = QGridLayout(self.centralwidget)
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.horizontalLayout_10 = QHBoxLayout()
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.tableView = QTableView(self.centralwidget)
         self.tableView.setObjectName(u"tableView")
+        self.tableView.horizontalHeader().setStretchLastSection(True)
 
-        self.gridLayout_2.addWidget(self.tableView, 0, 0, 1, 1)
+        self.horizontalLayout_10.addWidget(self.tableView)
 
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_3 = QVBoxLayout()
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.groupBox_2 = QGroupBox(self.centralwidget)
         self.groupBox_2.setObjectName(u"groupBox_2")
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -143,8 +146,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
         self.groupBox_2.setSizePolicy(sizePolicy)
-        self.groupBox_2.setMinimumSize(QSize(264, 143))
-        self.groupBox_2.setMaximumSize(QSize(264, 143))
+        self.groupBox_2.setMinimumSize(QSize(264, 170))
+        self.groupBox_2.setMaximumSize(QSize(264, 170))
         self.gridLayout = QGridLayout(self.groupBox_2)
         self.gridLayout.setObjectName(u"gridLayout")
         self.verticalLayout = QVBoxLayout()
@@ -239,15 +242,112 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout_5)
 
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.timeOutLabel = QLabel(self.groupBox_2)
+        self.timeOutLabel.setObjectName(u"timeOutLabel")
+
+        self.horizontalLayout_6.addWidget(self.timeOutLabel)
+
+        self.timeOutSpinBox = QSpinBox(self.groupBox_2)
+        self.timeOutSpinBox.setObjectName(u"timeOutSpinBox")
+        sizePolicy3.setHeightForWidth(self.timeOutSpinBox.sizePolicy().hasHeightForWidth())
+        self.timeOutSpinBox.setSizePolicy(sizePolicy3)
+        self.timeOutSpinBox.setMinimumSize(QSize(129, 20))
+        self.timeOutSpinBox.setMaximumSize(QSize(129, 20))
+        self.timeOutSpinBox.setMinimum(1)
+        self.timeOutSpinBox.setMaximum(200)
+        self.timeOutSpinBox.setValue(2)
+
+        self.horizontalLayout_6.addWidget(self.timeOutSpinBox)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_6)
+
 
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
 
-        self.verticalLayout_2.addWidget(self.groupBox_2)
+        self.verticalLayout_3.addWidget(self.groupBox_2)
+
+        self.groupBox = QGroupBox(self.centralwidget)
+        self.groupBox.setObjectName(u"groupBox")
+        self.gridLayout_2 = QGridLayout(self.groupBox)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.IPsLabel = QLabel(self.groupBox)
+        self.IPsLabel.setObjectName(u"IPsLabel")
+        sizePolicy.setHeightForWidth(self.IPsLabel.sizePolicy().hasHeightForWidth())
+        self.IPsLabel.setSizePolicy(sizePolicy)
+        self.IPsLabel.setMinimumSize(QSize(75, 0))
+
+        self.horizontalLayout_7.addWidget(self.IPsLabel)
+
+        self.IPsLabelStat = QLabel(self.groupBox)
+        self.IPsLabelStat.setObjectName(u"IPsLabelStat")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.IPsLabelStat.sizePolicy().hasHeightForWidth())
+        self.IPsLabelStat.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_7.addWidget(self.IPsLabelStat)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_7)
+
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.CheckedLabel = QLabel(self.groupBox)
+        self.CheckedLabel.setObjectName(u"CheckedLabel")
+        sizePolicy.setHeightForWidth(self.CheckedLabel.sizePolicy().hasHeightForWidth())
+        self.CheckedLabel.setSizePolicy(sizePolicy)
+        self.CheckedLabel.setMinimumSize(QSize(75, 0))
+
+        self.horizontalLayout_8.addWidget(self.CheckedLabel)
+
+        self.CheckedLabelStat = QLabel(self.groupBox)
+        self.CheckedLabelStat.setObjectName(u"CheckedLabelStat")
+        sizePolicy4.setHeightForWidth(self.CheckedLabelStat.sizePolicy().hasHeightForWidth())
+        self.CheckedLabelStat.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_8.addWidget(self.CheckedLabelStat)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_8)
+
+        self.horizontalLayout_9 = QHBoxLayout()
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.FoundLabel = QLabel(self.groupBox)
+        self.FoundLabel.setObjectName(u"FoundLabel")
+        sizePolicy.setHeightForWidth(self.FoundLabel.sizePolicy().hasHeightForWidth())
+        self.FoundLabel.setSizePolicy(sizePolicy)
+        self.FoundLabel.setMinimumSize(QSize(75, 0))
+
+        self.horizontalLayout_9.addWidget(self.FoundLabel)
+
+        self.FoundLabelStat = QLabel(self.groupBox)
+        self.FoundLabelStat.setObjectName(u"FoundLabelStat")
+        sizePolicy4.setHeightForWidth(self.FoundLabelStat.sizePolicy().hasHeightForWidth())
+        self.FoundLabelStat.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_9.addWidget(self.FoundLabelStat)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_9)
+
+
+        self.gridLayout_2.addLayout(self.verticalLayout_2, 0, 0, 1, 1)
+
+
+        self.verticalLayout_3.addWidget(self.groupBox)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_2.addItem(self.verticalSpacer)
+        self.verticalLayout_3.addItem(self.verticalSpacer)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -282,10 +382,13 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.stopButton)
 
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout_3.addLayout(self.horizontalLayout)
 
 
-        self.gridLayout_2.addLayout(self.verticalLayout_2, 0, 1, 1, 1)
+        self.horizontalLayout_10.addLayout(self.verticalLayout_3)
+
+
+        self.gridLayout_3.addLayout(self.horizontalLayout_10, 0, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -324,10 +427,17 @@ class Ui_MainWindow(object):
         self.endIpLabel.setText(QCoreApplication.translate("MainWindow", u"Ending IP address:", None))
         self.portLabel.setText(QCoreApplication.translate("MainWindow", u"Check specific port:", None))
         self.threadsLabel.setText(QCoreApplication.translate("MainWindow", u"Number of Threads:", None))
+        self.timeOutLabel.setText(QCoreApplication.translate("MainWindow", u"Timeout:", None))
+        self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Statistics", None))
+        self.IPsLabel.setText(QCoreApplication.translate("MainWindow", u"IPs:", None))
+        self.IPsLabelStat.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.CheckedLabel.setText(QCoreApplication.translate("MainWindow", u"Checked:", None))
+        self.CheckedLabelStat.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.FoundLabel.setText(QCoreApplication.translate("MainWindow", u"Servers found:", None))
+        self.FoundLabelStat.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.startButton.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.pauseButton.setText(QCoreApplication.translate("MainWindow", u"Pause", None))
         self.stopButton.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
         self.menuAbout.setTitle(QCoreApplication.translate("MainWindow", u"About", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
     # retranslateUi
-

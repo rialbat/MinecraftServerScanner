@@ -16,12 +16,17 @@ import ipaddress
 from PySide6 import QtWidgets, QtCore, QtGui
 import MainWindow
 
+#GEO
+from findGEO import FindGEO
+
 # Parse
-#from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
+
+programVersion = '0.3'
 
 
 class ServerStatus:
-    def __init__(self, host='127.0.0.1', port=25565, timeout=5):
+    def __init__(self, host='127.0.0.1', port=25565, timeout=2):
         self._host = host
         self._port = port
         self._timeout = timeout
@@ -155,7 +160,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def aboutMessage(self):
         QtWidgets.QMessageBox.about(self, "About",
-                                    "The program was created by rialbat\nVersion: 0.1\nMIT License")
+                                    str("The program was created by rialbat\nVersion: %s\nMIT License" % programVersion))
 
     def startAsyncSerch(self):
         self.stopButton.setEnabled(True)
@@ -163,6 +168,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.pauseButton.setText("Pause")
 
         self._serverStatus._port = self.portSpinBox.value()
+        self._serverStatus._timeout = self.timeOutSpinBox.value()
 
         self._start_ip = ipaddress.IPv4Address(self.startIpLineEdit.text())
         self._end_ip = ipaddress.IPv4Address(self.endIpLineEdit.text())
@@ -170,6 +176,10 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
             self._serverStatus._host = str(ipaddress.IPv4Address(ip_int))
             self._totalLines = self._totalLines + 1
+            try:
+                serverResponse = self._serverStatus.get_status()
+            except Exception:
+                continue
             # ID
             itemID = QtGui.QStandardItem(str(self._totalLines))
             itemID.setTextAlignment(QtCore.Qt.AlignCenter) # type: ignore
@@ -188,8 +198,27 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             # Max players
 
             # Country, City, Hostname
+            gesGeo = FindGEO(str(ipaddress.IPv4Address(ip_int)))
+            gesGeo.findLocation()
 
-            print(self._serverStatus.get_status())
+            itemCountry = QtGui.QStandardItem(gesGeo.getCountry())
+            itemCity = QtGui.QStandardItem(gesGeo.getCity())
+            itemHostname = QtGui.QStandardItem(socket.gethostbyaddr(str(ipaddress.IPv4Address(ip_int)))[0])
+
+            itemCountry.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+            itemCity.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+            itemHostname.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+
+            self._model.setItem(self._totalLines - 1, 6, itemCountry)
+            self._model.setItem(self._totalLines - 1, 7, itemCity)
+            self._model.setItem(self._totalLines - 1, 8, itemHostname)
+
+            # Ping
+            itemPing = QtGui.QStandardItem(str(self._serverStatus.get_status()['ping']))
+            itemPing.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
+            self._model.setItem(self._totalLines - 1, 9, itemPing)
+
+            print(serverResponse)
 
 
 
