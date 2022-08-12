@@ -139,6 +139,8 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.startButton.clicked.connect(self.startAsyncSerch)
         self.stopButton.clicked.connect(self.stopAsyncSerch)
         self.pauseButton.clicked.connect(self.pauseAsyncSerch)
+        self.actionSave_results.triggered.connect(self.saveResults)
+        self.actionOpen_file.triggered.connect(self.openResults)
         self._model = QtGui.QStandardItemModel()
         self.tableInit()
 
@@ -174,6 +176,59 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         finalMatch = re.sub(subPattern, ' ', finalMatch)
         finalMatch = re.sub(secSubPattern, '', finalMatch)
         return finalMatch
+
+    def saveResults(self):
+        path = QtWidgets.QFileDialog.getSaveFileName(
+            self, 'Save File', '', 'CSV(*.csv)')
+        file = QtCore.QFile(path[0])
+        if path[0]:
+            if file.open(QtCore.QFile.WriteOnly | QtCore.QFile.Truncate):
+                data = QtCore.QTextStream(file)
+                strList = []
+                for column in range(self._model.columnCount()):
+                    if (len(str(self._model.headerData(column,
+                    QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))) > 0):
+                        strList.append(str(self._model.headerData(column,
+                    QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)))
+                    else:
+                        strList.append('')
+                data << ";".join(strList) << "\n"
+                for row in range(self._model.rowCount()):
+                    strList.clear()
+                    for column in range(self._model.columnCount()):
+                        if len(str(self._model.data(self._model.index(row, column)))) > 0:
+                            strList.append(str(self._model.data(self._model.index(row, column))))
+                        else:
+                            strList.append("")
+                    data << ";".join(strList) + "\n"
+                QtWidgets.QMessageBox.information(self, "Save result",
+                                        "Success!")
+
+    def openResults(self):
+        path = QtWidgets.QFileDialog.getOpenFileName(
+            self, 'Open File', '', 'CSV(*.csv)')
+        file = QtCore.QFile(path[0])
+        readHeaders = True
+        if file.open(QtCore.QIODevice.ReadOnly):
+            lineIndex = 0
+            inStream = QtCore.QTextStream(file)
+            while not inStream.atEnd():
+                fileLine = inStream.readLine()
+                lineToken = fileLine.split(";")
+                if readHeaders:
+                    readHeaders = False
+                    continue
+                for j in range(len(lineToken)):
+                    curValue = lineToken[j]
+                    item = QtGui.QStandardItem(curValue)
+                    item.setTextAlignment(QtCore.Qt.AlignCenter)
+                    self._model.setItem(lineIndex, j, item)
+                lineIndex = lineIndex + 1
+            self.tableView.resizeColumnsToContents()
+            self.tableView.resizeRowsToContents()
+            self.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap)
+            self.tableView.horizontalHeader().setMinimumHeight(40)
+
 
     def aboutMessage(self):
         QtWidgets.QMessageBox.about(self, "About",
@@ -264,10 +319,14 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             itemPing.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
             self._model.setItem(self._curLine - 1, 9, itemPing)
 
+            self.actionSave_results.setEnabled(True)
+
             # Debug Response
             # print(serverResponse)
-
-
+        self.tableView.resizeColumnsToContents()
+        self.tableView.resizeRowsToContents()
+        self.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap)
+        self.tableView.horizontalHeader().setMinimumHeight(40)
 
     def stopAsyncSerch(self):
         #TODO stop actions
