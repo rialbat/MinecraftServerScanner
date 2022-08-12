@@ -264,7 +264,8 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             itemPing.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
             self._model.setItem(self._curLine - 1, 9, itemPing)
 
-            print(serverResponse)
+            # Debug Response
+            # print(serverResponse)
 
 
 
