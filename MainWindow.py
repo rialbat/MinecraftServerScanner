@@ -133,6 +133,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.tableView = QTableView(self.centralwidget)
         self.tableView.setObjectName(u"tableView")
+        self.tableView.setSortingEnabled(True)
         self.tableView.horizontalHeader().setStretchLastSection(True)
 
         self.horizontalLayout_10.addWidget(self.tableView)
