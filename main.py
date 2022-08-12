@@ -218,6 +218,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             # Server description
             currentDescription = self.findDescription(serverResponse)
             itemDesc = QtGui.QStandardItem(currentDescription)
+            itemDesc.setTextAlignment(QtCore.Qt.AlignCenter)  # type: ignore
             self._model.setItem(self._curLine - 1, 2, itemDesc)
 
             # Version
