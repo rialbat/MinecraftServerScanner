@@ -236,7 +236,8 @@ class Ui_MainWindow(object):
         self.threadsSpinBox.setMinimumSize(QSize(129, 20))
         self.threadsSpinBox.setMaximumSize(QSize(129, 20))
         self.threadsSpinBox.setMinimum(1)
-        self.threadsSpinBox.setMaximum(200)
+        self.threadsSpinBox.setMaximum(500)
+        self.threadsSpinBox.setValue(100)
 
         self.horizontalLayout_5.addWidget(self.threadsSpinBox)
 
