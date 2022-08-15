@@ -172,6 +172,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self._totalLines = 0
         self._checked = 0
         self._threads = 0
+        self._workInProgress = False
 
         self._serverResponseList = []
 
@@ -260,6 +261,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def searchForServers(self, host):
         lServerStatus = ServerStatus(host, self._specificPort, self._specificTimeOut)
+        self._checked = self._checked + 1
 
         try:
             serverResponse = lServerStatus.get_status()
@@ -267,6 +269,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             pass
         else:
             self._serverResponseList.append(serverResponse)
+            self._curLine = self._curLine + 1
 
     def showTableResult(self):
         self._model.removeRows(0, self._model.rowCount())
@@ -338,6 +341,10 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             self.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap)
             self.tableView.horizontalHeader().setMinimumHeight(40)
 
+    def updateStats(self):
+        self.CheckedLabelStat.setText(str(self._checked))
+        self.FoundLabelStat.setText(str(self._curLine))
+
     def startAsyncSerch(self):
         self.stopButton.setEnabled(True)
         self.pauseButton.setEnabled(True)
@@ -359,9 +366,12 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             ipPool.append(str(ipaddress.IPv4Address(ip_int)))
 
         with ThreadPoolExecutor(max_workers=self._threads) as executor:
+            self._workInProgress = True
             for ip in ipPool:
                 executor.submit(self.searchForServers, ip)
 
+        self._workInProgress = False
+        self.updateStats()
         self.showTableResult()
 
     def stopAsyncSerch(self):
