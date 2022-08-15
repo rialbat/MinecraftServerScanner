@@ -152,6 +152,7 @@ class ServerStatus:
         return response
 
 class Worker(QtCore.QRunnable):
+    responseSignal = QtCore.Signal(str)
     def __init__(self, ip, port, timeout):
         super().__init__()
         self._ip = ip
@@ -167,8 +168,7 @@ class Worker(QtCore.QRunnable):
         except Exception:
             pass
         else:
-            print("Thread Worked")
-            return serverResponse
+            self.responseSignal.emit(serverResponse)
 
 
 class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
@@ -181,6 +181,10 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.pauseButton.clicked.connect(self.pauseAsyncSerch)
         self.actionSave_results.triggered.connect(self.saveResults)
         self.actionOpen_file.triggered.connect(self.openResults)
+
+        workerClass = Worker
+        workerClass.responseSignal[str].connect(self.receiveResponse)
+
         self._model = QtGui.QStandardItemModel()
         self.tableInit()
 
@@ -197,6 +201,9 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         self._serverResponseList = []
 
+    @QtCore.Slot(str)
+    def receiveResponse(self, response):
+        self._serverResponseList.append(response)
 
     def tableInit(self):
         headersLabels = ["ID", "Server address", "Server description",
@@ -374,14 +381,17 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
             ipPool.append(str(ipaddress.IPv4Address(ip_int)))
 
+        start_time = time.time()
         self._threadPool.setMaxThreadCount(self._threads)
         for ip in ipPool:
             self._threadPool.start(Worker(ip, self._specificPort, self._specificTimeOut))
+            self._checked = self._checked + 1
 
         # self._serverResponseList = worker.getResult()
 
         self.updateStats()
         self.showTableResult()
+        print("--- %s seconds ---" % (time.time() - start_time))
 
     def stopAsyncSerch(self):
         # TODO: stop actions
