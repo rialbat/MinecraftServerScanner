@@ -374,9 +374,9 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
             ipPool.append(str(ipaddress.IPv4Address(ip_int)))
 
+        self._threadPool.setMaxThreadCount(self._threads)
         for ip in ipPool:
-            worker = Worker(ip, self._specificPort, self._specificTimeOut)
-            self._threadPool.start(worker)
+            self._threadPool.start(Worker(ip, self._specificPort, self._specificTimeOut))
 
         # self._serverResponseList = worker.getResult()
 
