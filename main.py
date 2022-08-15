@@ -151,6 +151,26 @@ class ServerStatus:
 
         return response
 
+class Worker(QtCore.QRunnable):
+    def __init__(self, ip, port, timeout):
+        super().__init__()
+        self._ip = ip
+        self._specificPort = port
+        self._specificTimeOut = timeout
+
+    @QtCore.Slot()
+    def run(self):
+        lServerStatus = ServerStatus(self._ip, self._specificPort, self._specificTimeOut)
+
+        try:
+            serverResponse = lServerStatus.get_status()
+        except Exception:
+            pass
+        else:
+            print("Thread Worked")
+            return serverResponse
+
+
 class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -172,7 +192,8 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self._totalLines = 0
         self._checked = 0
         self._threads = 0
-        self._workInProgress = False
+
+        self._threadPool = QtCore.QThreadPool()
 
         self._serverResponseList = []
 
@@ -258,18 +279,6 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def aboutMessage(self):
         QtWidgets.QMessageBox.about(self, "About",
                                     str("The program was created by rialbat\nVersion: %s\nMIT License" % programVersion))
-
-    def searchForServers(self, host):
-        lServerStatus = ServerStatus(host, self._specificPort, self._specificTimeOut)
-        self._checked = self._checked + 1
-
-        try:
-            serverResponse = lServerStatus.get_status()
-        except Exception:
-            pass
-        else:
-            self._serverResponseList.append(serverResponse)
-            self._curLine = self._curLine + 1
 
     def showTableResult(self):
         self._model.removeRows(0, self._model.rowCount())
@@ -365,12 +374,12 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
             ipPool.append(str(ipaddress.IPv4Address(ip_int)))
 
-        with ThreadPoolExecutor(max_workers=self._threads) as executor:
-            self._workInProgress = True
-            for ip in ipPool:
-                executor.submit(self.searchForServers, ip)
+        for ip in ipPool:
+            worker = Worker(ip, self._specificPort, self._specificTimeOut)
+            self._threadPool.start(worker)
 
-        self._workInProgress = False
+        # self._serverResponseList = worker.getResult()
+
         self.updateStats()
         self.showTableResult()
 
