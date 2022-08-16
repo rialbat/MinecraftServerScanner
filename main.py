@@ -386,7 +386,6 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         for ip_int in range(int(self._start_ip), int(self._end_ip)+1):
             ipPool.append(str(ipaddress.IPv4Address(ip_int)))
 
-        start_time = time.time()
         self._threadPool.setMaxThreadCount(self._threads)
         for ip in ipPool:
             worker = Worker(ip, self._specificPort, self._specificTimeOut)
@@ -395,10 +394,7 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             self._threadPool.start(worker)
             self._checked = self._checked + 1
 
-        # self._serverResponseList = worker.getResult()
-
-        self.showTableResult()
-        print("--- %s seconds ---" % (time.time() - start_time))
+        # self.showTableResult()
 
     def stopAsyncSerch(self):
         # TODO: stop actions
