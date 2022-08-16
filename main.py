@@ -151,13 +151,18 @@ class ServerStatus:
 
         return response
 
+class WorkerSignals(QtCore.QObject):
+    result = QtCore.Signal(str)
+    updateStats = QtCore.Signal()
+
 class Worker(QtCore.QRunnable):
-    responseSignal = QtCore.Signal(str)
-    def __init__(self, ip, port, timeout):
-        super().__init__()
+    def __init__(self, ip='127.0.0.1', port=25565, timeout=2):
+        super(Worker, self).__init__()
         self._ip = ip
         self._specificPort = port
         self._specificTimeOut = timeout
+
+        self.signals = WorkerSignals()
 
     @QtCore.Slot()
     def run(self):
@@ -166,9 +171,10 @@ class Worker(QtCore.QRunnable):
         try:
             serverResponse = lServerStatus.get_status()
         except Exception:
-            pass
+            self.signals.updateStats.emit()
         else:
-            self.responseSignal.emit(serverResponse)
+            self.signals.result.emit(str(serverResponse))
+            self.signals.updateStats.emit()
 
 
 class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
@@ -181,9 +187,6 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.pauseButton.clicked.connect(self.pauseAsyncSerch)
         self.actionSave_results.triggered.connect(self.saveResults)
         self.actionOpen_file.triggered.connect(self.openResults)
-
-        workerClass = Worker
-        workerClass.responseSignal[str].connect(self.receiveResponse)
 
         self._model = QtGui.QStandardItemModel()
         self.tableInit()
@@ -202,8 +205,14 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self._serverResponseList = []
 
     @QtCore.Slot(str)
-    def receiveResponse(self, response):
-        self._serverResponseList.append(response)
+    def receiveResponse(self, serverResponse):
+        self._serverResponseList.append(serverResponse)
+        self._curLine = self._curLine + 1
+
+    @QtCore.Slot()
+    def updateStatsLabels(self):
+        self.CheckedLabelStat.setText(str(self._checked))
+        self.FoundLabelStat.setText(str(self._curLine))
 
     def tableInit(self):
         headersLabels = ["ID", "Server address", "Server description",
@@ -357,10 +366,6 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             self.tableView.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap)
             self.tableView.horizontalHeader().setMinimumHeight(40)
 
-    def updateStats(self):
-        self.CheckedLabelStat.setText(str(self._checked))
-        self.FoundLabelStat.setText(str(self._curLine))
-
     def startAsyncSerch(self):
         self.stopButton.setEnabled(True)
         self.pauseButton.setEnabled(True)
@@ -384,12 +389,14 @@ class ProgrammUI(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         start_time = time.time()
         self._threadPool.setMaxThreadCount(self._threads)
         for ip in ipPool:
-            self._threadPool.start(Worker(ip, self._specificPort, self._specificTimeOut))
+            worker = Worker(ip, self._specificPort, self._specificTimeOut)
+            worker.signals.result.connect(self.receiveResponse)
+            worker.signals.updateStats.connect(self.updateStatsLabels)
+            self._threadPool.start(worker)
             self._checked = self._checked + 1
 
         # self._serverResponseList = worker.getResult()
 
-        self.updateStats()
         self.showTableResult()
         print("--- %s seconds ---" % (time.time() - start_time))
 
